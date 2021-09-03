@@ -1,0 +1,11 @@
+---
+- name: ansible example play
+  hosts: all
+  gather_facts: false
+  #pre_tasks:
+  #  - setup:
+  #      gather_subset:
+  #        - hardware
+  roles:
+    - role: example
+      demo_role_debug_msg: "{{ site_debug_msg }}"
