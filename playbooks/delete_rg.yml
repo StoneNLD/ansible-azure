@@ -1,0 +1,11 @@
+- hosts: localhost
+  vars:
+    resource_group: myResourceGroup
+    location: eastus 
+  tasks:
+    - name: Force delete filled resource group
+      azure_rm_resourcegroup:
+        state: absent
+        force_delete_nonempty: true
+        name: "{{ resource_group }}"
+        location: "{{ location }}"
