@@ -3,7 +3,7 @@
   connection: local
   vars:
     tenant_id: "153f3196-eb20-449e-8a8f-f6058a20ee35"
-    object_id: "72ca5437-deba-42b9-bff5-0c183a0ba78c"
+    object_id: "9507d5d8-5efd-44ca-8272-af9b6c740807"
     vault_name: testkvstijn
 
   tasks:
