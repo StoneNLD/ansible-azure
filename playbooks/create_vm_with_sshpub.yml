@@ -49,7 +49,7 @@
       resource_group: "{{ resource_group }}"
       name: "{{ nsg_name }}"
       rules:
-        - name: SSH
+        - name: AllowSSH
           protocol: Tcp
           destination_port_range: 22
           access: Allow
