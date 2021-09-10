@@ -1,0 +1,83 @@
+- name: Create Azure VM
+  hosts: localhost
+  connection: local
+  vars:
+    resource_group: myResourceGroup
+    location: eastus
+    vnet_name: myvnet
+    vnet_addr_prefixes: "10.0.0.0/16"
+    subnet_name: mysubnet
+    subnet_addr_prefixes: "10.0.1.0/24" 
+    pip_name: mypublicip
+    nsg_name: mynsg
+    nic_name: mynic
+    vm_name: myvm
+    pub_key_data: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC9HzcdinLIItSazNaCkEMaSG1Gsp8f7/ZJ8r/oOqXD4M+7/DIoNZFa7rMg/0IDdAssHZUI6NkSQscIgvzZG22kaXvbIH0NWSTZxuu2pE3k6X8CkhnNkRzXzF4T6WdrDU11MEVTJ95KJ9GZy72IWFUXXa1/Yb0DsvpgUqcmHNkmdEW1d7S4ntlZu6id4CJ8Ptu6K+2UhiUwE7IarYMSTCCa+Zx6xtVG1BGKelWiRKpYt6MF7r/4wMvlih7syAXMZSNJ8enN2G+8ZGJG0OGHGteWixnkhSi7xDCmurzY34X+wodFisE/Rgc74geHVey1hhZS/izN4+XgCdS21KzaB0+1twppKGvbyqrFirjP4gnN5Uc2TomZQwPTKrwuPFkNA7zWNCCeZ2Em7r2Sj/wTINbbvwQbvPwTItkzZfC/P7hONbmwutNWiGMWGhoB6oaNN8TU8ZInuHgU1Si2ac+bMQVnLmg+MF49qeh1mUTFEu4cDqdF3p5yBTGUnQ6DCuaKuTU="
+  
+  tasks:
+  - name: Create resource group
+    azure_rm_resourcegroup:
+      name: "{{ resource_group }}"
+      location: "{{ location }}"
+
+  - name: Create virtual network
+    azure_rm_virtualnetwork:
+      resource_group: "{{ resource_group }}"
+      name: "{{ vnet_name }}"
+      address_prefixes: "{{ vnet_addr_prefixes }}"
+
+  - name: Add subnet
+    azure_rm_subnet:
+      resource_group: "{{ resource_group }}"
+      name: "{{ subnet_name }}"
+      address_prefix: "{{ subnet_addr_prefixes }}"
+      virtual_network: "{{ vnet_name }}"
+
+  - name: Create public IP address
+    azure_rm_publicipaddress:
+      resource_group: "{{ resource_group }}"
+      allocation_method: Static
+      name: "{{ pip_name }}"
+    register: output_ip_address
+
+  - name: Public IP of VM
+    debug:
+      msg: "The public IP is {{ output_ip_address.state.ip_address }}."
+
+  - name: Create Network Security Group that allows SSH
+    azure_rm_securitygroup:
+      resource_group: "{{ resource_group }}"
+      name: "{{ nsg_name }}"
+      rules:
+        - name: SSH
+          protocol: Tcp
+          destination_port_range: 22
+          access: Allow
+          priority: 1001
+          direction: Inbound
+
+  - name: Create virtual network interface card
+    azure_rm_networkinterface:
+      resource_group: "{{ resource_group }}"
+      name: "{{ nice_name }}"
+      virtual_network: "{{ vnet_name }}"
+      subnet: "{{ subnet_name}} "
+      public_ip_name: "{{ pip_name }}"
+      security_group: "{{ nsg_name }}"
+
+  - name: Create VM
+    azure_rm_virtualmachine:
+      resource_group: "{{ resource_group }}"
+      name: "{{ vm_name }}"
+      vm_size: Standard_DS1_v2
+      admin_username: azureuser
+      ssh_password_enabled: false
+      ssh_public_keys:
+        - path: /home/azureuser/.ssh/authorized_keys
+          key_data: "{{ pub_key_data }}"
+      network_interfaces: "{{ nic_name }}"
+      image:
+        offer: CentOS
+        publisher: OpenLogic
+        sku: '7.5'
+        version: latest
