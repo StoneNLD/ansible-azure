@@ -9,7 +9,7 @@
   tasks:
     - name: Create app service plan
       azure_rm_appserviceplan:
-        absent: yes
+        state: absent
         resource_group: "{{ resource_group }}"
         name: "{{ plan_name }}"
         is_linux: true
