@@ -1,0 +1,30 @@
+---
+- hosts: localhost
+  connection: local
+  vars:
+    tenant_id: "153f3196-eb20-449e-8a8f-f6058a20ee35"
+    object_id: "72ca5437-deba-42b9-bff5-0c183a0ba78c"
+    vault_name: testkvstijn
+
+  tasks:
+  - name: Create resource group 
+    azure_rm_resourcegroup:
+      name: ansible-kv-test-rg
+      location: eastus
+
+  - name: Create instance of Key Vault
+    azure_rm_keyvault:
+      resource_group: ansible-kv-test-rg
+      vault_name: "{{ vault_name }}"
+      enabled_for_deployment: yes
+      vault_tenant: "{{ tenant_id }}"
+      sku:
+        name: standard
+      access_policies:
+        - tenant_id: "{{ tenant_id }}"
+          object_id: "{{ object_id }}"
+          secrets:
+            - get
+            - list
+            - set
+            - delete
