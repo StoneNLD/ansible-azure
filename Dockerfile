@@ -19,6 +19,7 @@ RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc && \
     pip3 install ansible && \
     wget -q https://raw.githubusercontent.com/ansible-collections/azure/dev/requirements-azure.txt && \
     pip3 install -r requirements-azure.txt && \
+    pip install "pywinrm>=0.3.0" && \
     rm requirements-azure.txt && \
     ansible-galaxy collection install azure.azcollection && \
     git clone https://github.com/StoneNLD/ansible-azure.git
